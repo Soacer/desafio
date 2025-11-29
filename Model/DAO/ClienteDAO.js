@@ -20,6 +20,12 @@ const Cliente = database.sequelize.define('Cliente', {
     cnpj: {
         type: DataTypes.STRING(14), // Se for guardar sem pontos/traços. Se for com, use STRING(18)
         allowNull: false
+    },
+
+    status: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: true
     }
 }, {
     // --- Configurações para Banco Legado ---

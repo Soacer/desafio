@@ -4,22 +4,40 @@ const ClienteDAO = require("../Model/DAO/ClienteDAO");
 
 module.exports = {
     async create(req, res) {
-        const dados = req.body;
+        const dados = req.body || {};
+        const idClienteRecebido = dados.clienteId || dados.Cliente_idClientes;
 
         try {
             const Transacao = new TransacaoBean(
                 null,
-                dados.Cliente_idClientes, // Pega do JSON
+                idClienteRecebido,
                 dados.valor
             );
 
-            const clienteEncontrado = await ClienteDAO.findByPk(Transacao.Cliente_idClientes);
+            // 1. Busca o cliente no banco
+            const clienteEncontrado = await ClienteDAO.findOne({
+                where: {
+                    idClientes: Transacao.Cliente_idClientes,
+                    status: true
+                }
+            });
 
-            //Verifica se achou (se for null, entra no if)
             if (!clienteEncontrado) {
                 console.log("Não existe Cliente com esse ID");
                 return res.status(404).json({ erro: "Cliente não encontrado" });
-            } else {
+            } 
+            
+            // --- AQUI ESTÁ A CORREÇÃO (A TRAVA DE SEGURANÇA) ---
+            // Verifica se o status é false (0). Se for, bloqueia!
+            if (!clienteEncontrado.status) {
+                return res.status(400).json({ 
+                    erro: "Operação Bloqueada",
+                    mensagem: "Este cliente está inativo/deletado e não pode realizar transações."
+                });
+            }
+            // ----------------------------------------------------
+
+            else {
                 const TransacaoSalvar = await TransacaoDAO.create({
                     Cliente_idClientes: Transacao.Cliente_idClientes,
                     valor: Transacao.valor

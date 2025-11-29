@@ -10,11 +10,13 @@ module.exports = {
             const Cliente = new ClienteBean( //Encapsula elas na model bean
                 null,
                 dados.nome,
-                dados.cnpj
+                dados.cnpj,
+                dados.status
             );
             const ClienteSalvar = await ClienteDAO.create({ //Insere no banco de dados
                 nome: Cliente.nome,
-                cnpj: Cliente.cnpj
+                cnpj: Cliente.cnpj,
+                status: Cliente.status
             });
 
             return res.status(201).json(ClienteSalvar);
@@ -67,23 +69,25 @@ module.exports = {
     },
     
     async delete(req, res){
-        try{
-            const {id} = req.params; //Pega o ID
+        try {
+            const { id } = req.params;
 
-            //Executa o delete
-            const linhas = await ClienteDAO.destroy({
-                where: {idClientes: id}
+            // Soft Delete: Atualiza o status para false em vez de apagar o registro
+            const [linhas] = await ClienteDAO.update({
+                status: false
+            }, {
+                where: { idClientes: id }
             });
 
-            //Se retornar 0, ID não existe no banco
             if(linhas === 0){
-                return res.status(404).json({erro: "Cliente não encontrado"}) //Exibe erro caso não ache
+                return res.status(404).json({erro: "Cliente não encontrado"});
             }
 
-            return res.status(200).json({mensagem: "Cliente deletado!"})
-        }catch(erro){
+            return res.status(200).json({mensagem: "Cliente desativado com sucesso"});
+
+        } catch(erro){
             console.log(erro);
-            return res.status(500).json({erro: "Erro ao deletar o cliente"})
+            return res.status(500).json({erro: "Erro ao desativar cliente"});
         }
     }
 }

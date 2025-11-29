@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS `mydb`.`Cliente` (
   `idClientes` INT NOT NULL AUTO_INCREMENT,
   `nome` VARCHAR(255) NOT NULL,
   `cnpj` VARCHAR(14) NOT NULL,
+  `status` boolean NOT NULL,
   PRIMARY KEY (`idClientes`),
   UNIQUE INDEX `idClientes_UNIQUE` (`idClientes` ASC) VISIBLE,
   UNIQUE INDEX `cnpj_UNIQUE` (`cnpj` ASC) VISIBLE)
